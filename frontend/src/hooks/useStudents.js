@@ -1,23 +1,25 @@
-import { useQuery, useMutation, useQueryClient } from "react-query";
+// src/hooks/useStudents.js
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { studentAPI } from "../services/api";
 import toast from "react-hot-toast";
 
+// 🔍 Get all students
 export const useStudents = () => {
-  return useQuery(
-    "students",
-    () => studentAPI.getAll().then((res) => res.data),
-    {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    }
-  );
+  return useQuery({
+    queryKey: ["students"],
+    queryFn: () => studentAPI.getAll().then((res) => res.data),
+    staleTime: 5 * 60 * 1000,
+  });
 };
 
+// ➕ Create student
 export const useCreateStudent = () => {
   const queryClient = useQueryClient();
 
-  return useMutation(studentAPI.create, {
+  return useMutation({
+    mutationFn: studentAPI.create,
     onSuccess: () => {
-      queryClient.invalidateQueries("students");
+      queryClient.invalidateQueries({ queryKey: ["students"] });
       toast.success("Student created successfully");
     },
     onError: (error) => {
@@ -26,12 +28,14 @@ export const useCreateStudent = () => {
   });
 };
 
+// ✏️ Update student
 export const useUpdateStudent = () => {
   const queryClient = useQueryClient();
 
-  return useMutation(({ id, data }) => studentAPI.update(id, data), {
+  return useMutation({
+    mutationFn: ({ id, data }) => studentAPI.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries("students");
+      queryClient.invalidateQueries({ queryKey: ["students"] });
       toast.success("Student updated successfully");
     },
     onError: (error) => {
@@ -40,12 +44,14 @@ export const useUpdateStudent = () => {
   });
 };
 
+// ❌ Delete student
 export const useDeleteStudent = () => {
   const queryClient = useQueryClient();
 
-  return useMutation(studentAPI.delete, {
+  return useMutation({
+    mutationFn: studentAPI.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries("students");
+      queryClient.invalidateQueries({ queryKey: ["students"] });
       toast.success("Student deleted successfully");
     },
     onError: (error) => {

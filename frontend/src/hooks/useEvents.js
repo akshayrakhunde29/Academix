@@ -1,33 +1,34 @@
 // src/hooks/useEvents.js
-import { useQuery, useMutation, useQueryClient } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { eventAPI } from "../services/api";
 import toast from "react-hot-toast";
 
 // 🔍 Get All Events
 export const useEvents = () => {
-  return useQuery("events", () => eventAPI.getAll().then((res) => res.data), {
+  return useQuery({
+    queryKey: ["events"],
+    queryFn: () => eventAPI.getAll().then((res) => res.data),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
 // 🎯 Get Single Event by ID
 export const useEventById = (id) => {
-  return useQuery(
-    ["event", id],
-    () => eventAPI.getById(id).then((res) => res.data),
-    {
-      enabled: !!id, // only run if id exists
-    }
-  );
+  return useQuery({
+    queryKey: ["event", id],
+    queryFn: () => eventAPI.getById(id).then((res) => res.data),
+    enabled: !!id,
+  });
 };
 
 // ➕ Create Event
 export const useCreateEvent = () => {
   const queryClient = useQueryClient();
 
-  return useMutation(eventAPI.create, {
+  return useMutation({
+    mutationFn: eventAPI.create,
     onSuccess: () => {
-      queryClient.invalidateQueries("events");
+      queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Event created successfully");
     },
     onError: (error) => {
@@ -40,9 +41,10 @@ export const useCreateEvent = () => {
 export const useUpdateEvent = () => {
   const queryClient = useQueryClient();
 
-  return useMutation(({ id, data }) => eventAPI.update(id, data), {
+  return useMutation({
+    mutationFn: ({ id, data }) => eventAPI.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries("events");
+      queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Event updated successfully");
     },
     onError: (error) => {
@@ -55,9 +57,10 @@ export const useUpdateEvent = () => {
 export const useDeleteEvent = () => {
   const queryClient = useQueryClient();
 
-  return useMutation(eventAPI.delete, {
+  return useMutation({
+    mutationFn: eventAPI.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries("events");
+      queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Event deleted successfully");
     },
     onError: (error) => {
